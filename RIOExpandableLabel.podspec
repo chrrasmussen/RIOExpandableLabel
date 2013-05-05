@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.homepage     = "http://EXAMPLE/RIOExpandableLabel"
   s.license      = 'MIT'
   s.author       = { "Christian Rasmussen" => "christian.rasmussen@me.com" }
-  s.source       = { :git => "https://github.com/skohorn/RIOExpandableLabel.git", :tag => "0.0.1" }
+  s.source       = { :git => "https://github.com/skohorn/RIOExpandableLabel.git", :tag => s.version.to_s }
   s.platform     = :ios, '6.0'
   s.source_files = 'RIOExpandableLabel/*.{h,m}'
   s.requires_arc = true

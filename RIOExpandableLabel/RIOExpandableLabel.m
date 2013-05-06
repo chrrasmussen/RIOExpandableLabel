@@ -59,7 +59,7 @@ static NSString * const kEllipsis = @"...";
         if (self.maxNumberOfLines > 0) {
             allowedInitialHeight = [self.textFont lineHeight] * self.maxNumberOfLines;
         }
-//        NSLog(@"%f %f %f", [self wantedHeight], allowedInitialHeight, MIN([self wantedHeight], allowedInitialHeight));
+        
         return MIN([self wantedHeight], allowedInitialHeight);
     }
     else {
@@ -123,7 +123,6 @@ static NSString * const kEllipsis = @"...";
 
 - (void)layoutSubviews
 {
-    NSLog(@"width:%f", self.displayHeight);
     if ([self wantedHeight] > self.displayHeight) {
         self.displayText = [[self class] stringByTruncatingText:self.text withFont:self.textFont constrainedToSize:CGSizeMake(self.bounds.size.width, self.displayHeight) skippingButtonWidth:self.moreButton.bounds.size.width];
         self.moreButton.hidden = NO;
@@ -233,7 +232,7 @@ static NSString * const kEllipsis = @"...";
     NSMutableString *rowText = [[text substringWithRange:NSMakeRange(rowStartPosition, rowEndPosition - rowStartPosition)] mutableCopy];
     CGFloat columnEnd = initialSize.width;
     while (columnEnd > constrainedSize.width - buttonWidth - [kEllipsis sizeWithFont:font].width) {
-        [rowText deleteCharactersInRange:NSMakeRange(rowText.length - 1, 1)];
+        [self removeLastWordFromString:rowText];
         columnEnd = [rowText sizeWithFont:font constrainedToSize:constrainedSize].width;
     }
     NSUInteger columnEndPosition = rowText.length;

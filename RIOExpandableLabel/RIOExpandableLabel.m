@@ -10,18 +10,13 @@
 #import "RIOExpandableLabelDelegate.h"
 
 
-static CGFloat const kTextViewPaddingOffset = -8;
-
-static NSString * const kEllipsis = @"...";
+static CGSize const kTextViewInset = {-4, -8};
 
 
 @interface RIOExpandableLabel ()
 
 @property (nonatomic, strong) UITextView *textView;
 @property (nonatomic, strong) UIButton *moreButton;
-
-@property (nonatomic) BOOL expanded;
-@property (nonatomic, strong) NSString *displayText;
 
 @end
 
@@ -42,48 +37,25 @@ static NSString * const kEllipsis = @"...";
     [self setUpView];
 }
 
-- (NSString *)displayText
-{
-    return self.textView.text;
-}
-
-- (void)setDisplayText:(NSString *)displayText
-{
-    self.textView.text = displayText;
-}
-
-- (CGFloat)displayHeight
-{
-    if (self.expanded == NO) {
-        CGFloat allowedInitialHeight = CGFLOAT_MAX;
-        if (self.maxNumberOfLines > 0) {
-            allowedInitialHeight = [self.textFont lineHeight] * self.maxNumberOfLines;
-        }
-        
-        return MIN([self wantedHeight], allowedInitialHeight);
-    }
-    else {
-        return [self wantedHeight];
-    }
-}
-
 - (void)setMaxNumberOfLines:(NSUInteger)maxNumberOfLines
 {
     _maxNumberOfLines = maxNumberOfLines;
-    [self setNeedsLayout];
+    self.textView.textContainer.maximumNumberOfLines = maxNumberOfLines;
+    [self updateLayout];
 }
 
 - (void)setText:(NSString *)text
 {
     _text = [text copy];
-    [self setNeedsLayout];
+    self.textView.text = _text;
+    [self updateLayout];
 }
 
 - (void)setTextFont:(UIFont *)textFont
 {
     _textFont = textFont;
     self.textView.font = textFont;
-    [self setNeedsLayout];
+    [self updateLayout];
 }
 
 - (void)setTextColor:(UIColor *)textColor
@@ -95,15 +67,15 @@ static NSString * const kEllipsis = @"...";
 - (void)setMoreButtonText:(NSString *)moreButtonText
 {
     _moreButtonText = [moreButtonText copy];
-    [self.moreButton setTitle:moreButtonText forState:UIControlStateNormal];
-    [self setNeedsLayout];
+    [self.moreButton setTitle:_moreButtonText forState:UIControlStateNormal];
+    [self updateLayout];
 }
 
 - (void)setMoreButtonFont:(UIFont *)moreButtonFont
 {
     _moreButtonFont = moreButtonFont;
     [self.moreButton.titleLabel setFont:moreButtonFont];
-    [self setNeedsLayout];
+    [self updateLayout];
 }
 
 - (void)setMoreButtonColor:(UIColor *)moreButtonColor
@@ -113,35 +85,10 @@ static NSString * const kEllipsis = @"...";
 }
 
 
-
-#pragma mark - UIView subclass
-
-- (CGSize)intrinsicContentSize
-{
-    return [self.text sizeWithFont:self.textFont];
-}
-
-- (void)layoutSubviews
-{
-    if ([self wantedHeight] > self.displayHeight) {
-        self.displayText = [[self class] stringByTruncatingText:self.text withFont:self.textFont constrainedToSize:CGSizeMake(self.bounds.size.width, self.displayHeight) skippingButtonWidth:self.moreButton.bounds.size.width];
-        self.moreButton.hidden = NO;
-    }
-    else {
-        self.displayText = self.text;
-        self.moreButton.hidden = YES;
-    }
-    
-    [self.delegate expandableLabelDidLayout:self];
-}
-
-
 #pragma mark - Private methods
 
 - (void)setUpView
 {
-    self.clipsToBounds = YES;
-    
     // Default settings
     _maxNumberOfLines = 4;
     
@@ -153,17 +100,21 @@ static NSString * const kEllipsis = @"...";
     _moreButtonColor = [UIColor blackColor];
     
     [self setUpTextView];
-    [self setUpButton];
 }
 
 - (void)setUpTextView
 {
     // Set up dimensions
-    self.textView = [[UITextView alloc] initWithFrame:CGRectInset(self.bounds, kTextViewPaddingOffset, kTextViewPaddingOffset)];
+    self.textView = [[UITextView alloc] initWithFrame:CGRectInset(self.bounds, kTextViewInset.width, kTextViewInset.height)];
     self.textView.backgroundColor = [UIColor clearColor];
-    self.textView.userInteractionEnabled = NO;
+    self.textView.editable = NO;
+    self.textView.scrollEnabled = NO;
     self.textView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.textView.translatesAutoresizingMaskIntoConstraints = YES;
+    
+    // Set up text container
+    NSTextContainer *textContainer = self.textView.textContainer;
+    textContainer.lineBreakMode = NSLineBreakByTruncatingTail;
     
     // Set styles
     self.textView.font = self.textFont;
@@ -172,84 +123,87 @@ static NSString * const kEllipsis = @"...";
     [self addSubview:self.textView];
 }
 
-- (void)setUpButton
-{
-    CGSize buttonSize = [self.moreButtonText sizeWithFont:self.moreButtonFont];
-    
-    // Set up dimensions
-    self.moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    self.moreButton.frame = CGRectMake(self.bounds.size.width - buttonSize.width, self.bounds.size.height - buttonSize.height, buttonSize.width, buttonSize.height);
-    self.moreButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
-    self.moreButton.translatesAutoresizingMaskIntoConstraints = YES;
-    [self.moreButton addTarget:self action:@selector(revealText) forControlEvents:UIControlEventTouchUpInside];
-    
-    // Set styles
-    [self.moreButton setTitle:self.moreButtonText forState:UIControlStateNormal];
-    [self.moreButton.titleLabel setFont:self.moreButtonFont];
-    [self.moreButton setTitleColor:self.textColor forState:UIControlStateNormal];
-    
-    [self addSubview:self.moreButton];
-}
-
 - (void)revealText
 {
-    self.expanded = YES;
+    [self removeButton];
+    self.textView.textContainer.maximumNumberOfLines = 0;
+    
     [self.delegate expandableLabelWantsToRevealText:self];
 }
 
-- (CGFloat)wantedHeight
+- (void)updateLayout
 {
-    CGSize wantedSize = [self.text sizeWithFont:self.textFont constrainedToSize:CGSizeMake(self.bounds.size.width, CGFLOAT_MAX)];
-    return wantedSize.height;
+    [self removeButton];
+    
+    if (self.bounds.size.height != [self displayHeight]) {
+        [self.delegate expandableLabelDidLayout:self];
+    }
+    
+    [self addButtonIfNeeded];
 }
 
-
-#pragma mark - Helper methods
-
-+ (NSString *)stringByTruncatingText:(NSString *)text withFont:(UIFont *)font constrainedToSize:(CGSize)constrainedSize skippingButtonWidth:(CGFloat)buttonWidth
+- (void)addButtonIfNeeded
 {
-    CGSize unconstrainedHeightSize = CGSizeMake(constrainedSize.width, CGFLOAT_MAX);
-    
-    // Find truncated row
-    NSMutableString *lineString = [text mutableCopy];
-    CGSize initialSize = [lineString sizeWithFont:font constrainedToSize:unconstrainedHeightSize];
-    
-    CGFloat rowEndValue = initialSize.height;
-    while (rowEndValue > constrainedSize.height) {
-        [self removeLastWordFromString:lineString];
-        rowEndValue = [lineString sizeWithFont:font constrainedToSize:unconstrainedHeightSize].height;
+    BOOL shouldAddButton = ([self isTextTruncated] == YES && self.moreButton == nil);
+    if (shouldAddButton) {
+        [self addButton];
     }
-    NSUInteger rowEndPosition = lineString.length;
     
-    CGFloat rowStartValue = initialSize.height;
-    while (rowStartValue > constrainedSize.height - [font lineHeight]) {
-        [self removeLastWordFromString:lineString];
-        rowStartValue = [lineString sizeWithFont:font constrainedToSize:unconstrainedHeightSize].height;
-    }
-    NSUInteger rowStartPosition = lineString.length + 1;
-    
-    // Find truncated column
-    NSMutableString *rowText = [[text substringWithRange:NSMakeRange(rowStartPosition, rowEndPosition - rowStartPosition)] mutableCopy];
-    CGFloat columnEnd = initialSize.width;
-    while (columnEnd > constrainedSize.width - buttonWidth - [kEllipsis sizeWithFont:font].width) {
-        [self removeLastWordFromString:rowText];
-        columnEnd = [rowText sizeWithFont:font constrainedToSize:constrainedSize].width;
-    }
-    NSUInteger columnEndPosition = rowText.length;
-    
-    // Truncate and add ellipsis
-    NSString *truncatedString = [text substringWithRange:NSMakeRange(0, rowStartPosition + columnEndPosition)];
-    NSString *truncatedStringWithEllipsis = [truncatedString stringByAppendingString:kEllipsis];
-    
-    return truncatedStringWithEllipsis;
+    [self performSelector:@selector(updateExclusionPath) withObject:nil afterDelay:0];
 }
 
-+ (void)removeLastWordFromString:(NSMutableString *)string
+- (void)updateExclusionPath
 {
-    NSRange range = [string rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] options:NSBackwardsSearch];
-    if (range.location != NSNotFound) {
-        [string deleteCharactersInRange:NSMakeRange(range.location - 1, (string.length - range.location))];
+    if (self.moreButton != nil && CGRectIsEmpty(self.moreButton.frame) == NO) {
+        UIBezierPath *buttonPath = [UIBezierPath bezierPathWithRect:self.moreButton.frame];
+        self.textView.textContainer.exclusionPaths = @[buttonPath];
     }
+}
+
+- (void)addButton {
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    [button addTarget:self action:@selector(revealText) forControlEvents:UIControlEventTouchUpInside];
+    [button setTitle:self.moreButtonText forState:UIControlStateNormal];
+    [button setTitleColor:self.textColor forState:UIControlStateNormal];
+    [button.titleLabel setFont:self.moreButtonFont];
+    
+    button.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addSubview:button];
+    CGSize buttonSize = [self.moreButtonText sizeWithAttributes:@{NSFontAttributeName: self.moreButtonFont}];
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[button]|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(button)]];
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[button(buttonHeight)]|" options:0 metrics:@{@"buttonHeight": @(buttonSize.height)} views:NSDictionaryOfVariableBindings(button)]];
+    
+    self.moreButton = button;
+}
+
+- (void)removeButton {
+    self.textView.textContainer.exclusionPaths = nil;
+    
+    [self.moreButton removeFromSuperview];
+    
+    self.moreButton = nil;
+}
+
+- (CGFloat)displayHeight
+{
+    CGSize sizeThatFits = [self.textView sizeThatFits:CGSizeMake(self.textView.bounds.size.width, CGFLOAT_MAX)];
+    return ceilf(sizeThatFits.height + 2 * kTextViewInset.height);
+}
+
+- (BOOL)isTextTruncated
+{
+    NSLayoutManager *layoutManager = self.textView.layoutManager;
+    NSTextContainer *textContainer = self.textView.textContainer;
+    
+    NSRange glyphRange = [layoutManager glyphRangeForTextContainer:textContainer];
+    if (glyphRange.length == 0) {
+        return NO;
+    }
+    
+    NSUInteger lastGlyph = NSMaxRange(glyphRange) - 1;
+    NSRange truncatedRange = [layoutManager truncatedGlyphRangeInLineFragmentForGlyphAtIndex:lastGlyph];
+    
+    return (truncatedRange.location != NSNotFound);
 }
 
 @end

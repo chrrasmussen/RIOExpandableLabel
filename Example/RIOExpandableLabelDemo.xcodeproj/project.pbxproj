@@ -281,6 +281,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "RIOExpandableLabelDemo/RIOExpandableLabelDemo-Prefix.pch";
 				INFOPLIST_FILE = "RIOExpandableLabelDemo/RIOExpandableLabelDemo-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = RIOExpandableLabelDemo;
 				WRAPPER_EXTENSION = app;
 			};
@@ -292,6 +293,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "RIOExpandableLabelDemo/RIOExpandableLabelDemo-Prefix.pch";
 				INFOPLIST_FILE = "RIOExpandableLabelDemo/RIOExpandableLabelDemo-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = RIOExpandableLabelDemo;
 				WRAPPER_EXTENSION = app;
 			};

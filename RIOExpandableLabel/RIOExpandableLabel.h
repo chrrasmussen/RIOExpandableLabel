@@ -15,7 +15,6 @@
 
 @property (nonatomic, weak) id<RIOExpandableLabelDelegate> delegate;
 
-@property (nonatomic, readonly) NSString *displayText;
 @property (nonatomic, readonly) CGFloat displayHeight;
 @property (nonatomic) NSUInteger maxNumberOfLines;
 

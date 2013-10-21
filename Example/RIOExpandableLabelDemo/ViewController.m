@@ -18,7 +18,9 @@
 	// Do any additional setup after loading the view, typically from a nib.
     
     self.expandableLabel.delegate = self;
+    NSLog(@"Setting text...");
     self.expandableLabel.text = @"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi elementum mi et justo venenatis a porttitor felis iaculis. Praesent et nibh velit, eu laoreet urna. Morbi feugiat rhoncus aliquet.";
+    NSLog(@"Settings maxNumberOfLines...");
     self.expandableLabel.maxNumberOfLines = 2;
 }
 
@@ -35,7 +37,10 @@
 
 - (IBAction)changeMaxNumberOfLines:(id)sender
 {
-    self.expandableLabel.maxNumberOfLines = 5;
+    [UIView animateWithDuration:1 animations:^{
+        self.expandableLabel.maxNumberOfLines = 5;
+        [self.view layoutIfNeeded];
+    }];
 }
 
 
@@ -43,11 +48,13 @@
 
 - (void)expandableLabelDidLayout:(RIOExpandableLabel *)expandableLabel
 {
+    NSLog(@"%s", __PRETTY_FUNCTION__);
     self.heightConstraint.constant = expandableLabel.displayHeight;
 }
 
 - (void)expandableLabelWantsToRevealText:(RIOExpandableLabel *)expandableLabel
 {
+    NSLog(@"%s", __PRETTY_FUNCTION__);
     [UIView animateWithDuration:0.3 animations:^{
         self.heightConstraint.constant = expandableLabel.displayHeight;
         [self.view layoutIfNeeded];

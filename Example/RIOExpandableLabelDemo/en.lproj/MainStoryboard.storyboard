@@ -37,12 +37,9 @@
                                             <action selector="changeMaxNumberOfLines:" destination="2" eventType="touchUpInside" id="LqC-bd-6vv"/>
                                         </connections>
                                     </button>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tRO-OY-L5Z" customClass="RIOExpandableLabel">
+                                    <view contentMode="scaleToFill" placeholderIntrinsicWidth="infinite" placeholderIntrinsicHeight="45" translatesAutoresizingMaskIntoConstraints="NO" id="tRO-OY-L5Z" customClass="RIOExpandableLabel">
                                         <rect key="frame" x="20" y="58" width="280" height="45"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="45" id="VuP-mS-wL9"/>
-                                        </constraints>
                                     </view>
                                 </subviews>
                                 <color key="backgroundColor" white="0.95999999999999996" alpha="1" colorSpace="calibratedWhite"/>
@@ -71,7 +68,6 @@
                     </view>
                     <connections>
                         <outlet property="expandableLabel" destination="tRO-OY-L5Z" id="QUr-aP-Lnh"/>
-                        <outlet property="heightConstraint" destination="VuP-mS-wL9" id="HEQ-rb-cP7"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4" sceneMemberID="firstResponder"/>

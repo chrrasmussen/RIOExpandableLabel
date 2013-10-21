@@ -7,7 +7,6 @@
 //
 
 #import "RIOExpandableLabel.h"
-#import "RIOExpandableLabelDelegate.h"
 
 
 static CGSize const kTextViewInset = {-4, -8};
@@ -37,6 +36,24 @@ static CGSize const kTextViewInset = {-4, -8};
     [self setUpView];
 }
 
+- (CGSize)intrinsicContentSize
+{
+    CGSize sizeThatFits = [self.textView sizeThatFits:CGSizeMake(self.textView.bounds.size.width, CGFLOAT_MAX)];
+    CGFloat height = ceilf(sizeThatFits.height + 2 * kTextViewInset.height);
+    
+    return CGSizeMake(-1, height);
+}
+
+- (void)moreButtonAddTarget:(id)target action:(SEL)action
+{
+    [self.moreButton addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void)moreButtonRemoveTarget:(id)target action:(SEL)action
+{
+    [self.moreButton removeTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+}
+
 
 #pragma mark - Private methods
 
@@ -45,6 +62,9 @@ static CGSize const kTextViewInset = {-4, -8};
     self.clipsToBounds = YES;
     
     [self addSubview:self.textView];
+    
+//    [self updateLayout];
+    [self performSelector:@selector(updateLayout) withObject:nil afterDelay:0];
     
     // Default settings
     self.maxNumberOfLines = 4;
@@ -57,36 +77,15 @@ static CGSize const kTextViewInset = {-4, -8};
     self.moreButtonColor = [UIColor blackColor];
 }
 
-- (void)revealText
-{
-    [self removeButton];
-    self.textView.textContainer.maximumNumberOfLines = 0;
-//    self.maxNumberOfLines = 10;
-    
-    [self.delegate expandableLabelWantsToRevealText:self];
-}
-
 - (void)updateLayout
 {
+    [self removeButton];
+    
+    [self invalidateIntrinsicContentSize];
+    [self updateConstraintsIfNeeded];
     [self setNeedsLayout];
     
-    if (self.bounds.size.height != self.displayHeight) {
-        [self.delegate expandableLabelDidLayout:self];
-    }
-}
-
-- (void)layoutSubviews
-{
-//    NSLog(@"%s", __PRETTY_FUNCTION__);
-    
-    [self removeButton];
-    [super layoutSubviews];
-    
-//    [self performSelector:@selector(addButtonIfNeeded) withObject:nil afterDelay:0];
-    [self addButtonIfNeeded];
-    [super layoutSubviews];
-    
-    [self performSelector:@selector(removeButtonIfNotNeeded) withObject:nil afterDelay:0];
+    [self performSelector:@selector(addButtonIfNeeded) withObject:nil afterDelay:0];
 }
 
 - (void)addButtonIfNeeded
@@ -130,11 +129,6 @@ static CGSize const kTextViewInset = {-4, -8};
     [self.moreButton removeFromSuperview];
 }
 
-- (CGFloat)displayHeight
-{
-    CGSize sizeThatFits = [self.textView sizeThatFits:CGSizeMake(self.textView.bounds.size.width, CGFLOAT_MAX)];
-    return ceilf(sizeThatFits.height + 2 * kTextViewInset.height);
-}
 
 - (BOOL)isTextTruncated
 {
@@ -161,7 +155,6 @@ static CGSize const kTextViewInset = {-4, -8};
         [_moreButton setTitle:self.moreButtonText forState:UIControlStateNormal];
         [_moreButton setTitleColor:self.textColor forState:UIControlStateNormal];
         [_moreButton.titleLabel setFont:self.moreButtonFont];
-        [_moreButton addTarget:self action:@selector(revealText) forControlEvents:UIControlEventTouchUpInside];
     }
     
     return _moreButton;

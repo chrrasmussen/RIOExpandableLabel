@@ -7,12 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "RIOExpandableLabelDelegate.h"
+
+@class RIOExpandableLabel;
 
 
-@interface ViewController : UIViewController <RIOExpandableLabelDelegate>
+@interface ViewController : UIViewController
 
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint *heightConstraint;
 @property (nonatomic, weak) IBOutlet RIOExpandableLabel *expandableLabel;
 
 @end

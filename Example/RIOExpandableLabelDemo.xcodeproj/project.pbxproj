@@ -40,7 +40,6 @@
 		69245E591734B9F1006D3803 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		6953B6311736EAE500C4ECBE /* RIOExpandableLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIOExpandableLabel.h; sourceTree = "<group>"; };
 		6953B6321736EAE500C4ECBE /* RIOExpandableLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RIOExpandableLabel.m; sourceTree = "<group>"; };
-		6953B6331736EAE500C4ECBE /* RIOExpandableLabelDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIOExpandableLabelDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,7 +117,6 @@
 			children = (
 				6953B6311736EAE500C4ECBE /* RIOExpandableLabel.h */,
 				6953B6321736EAE500C4ECBE /* RIOExpandableLabel.m */,
-				6953B6331736EAE500C4ECBE /* RIOExpandableLabelDelegate.h */,
 			);
 			name = RIOExpandableLabel;
 			path = ../../RIOExpandableLabel;

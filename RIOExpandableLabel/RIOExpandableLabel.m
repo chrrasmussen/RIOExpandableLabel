@@ -9,7 +9,7 @@
 #import "RIOExpandableLabel.h"
 
 
-static CGSize const kTextViewInset = {-4, -8};
+static CGSize const kTextViewInset = {-5, -8};
 
 
 @interface RIOExpandableLabel ()
@@ -41,7 +41,7 @@ static CGSize const kTextViewInset = {-4, -8};
     CGSize sizeThatFits = [self.textView sizeThatFits:CGSizeMake(self.textView.bounds.size.width, CGFLOAT_MAX)];
     CGFloat height = ceilf(sizeThatFits.height + 2 * kTextViewInset.height);
     
-    return CGSizeMake(-1, height);
+    return CGSizeMake(UIViewNoIntrinsicMetric, height);
 }
 
 - (void)moreButtonAddTarget:(id)target action:(SEL)action
